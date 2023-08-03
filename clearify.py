@@ -1,43 +1,45 @@
 #!/usr/bin/env python3
-from urllib.parse import quote_plus
 import os
-from dotenv import load_dotenv
-import praw
 
-QUESTIONS = ["what is", "who is", "what are"]
-REPLY_TEMPLATE = "[Let me google that for you](https://lmgtfy.com/?q={})"
+import praw
+from dotenv import load_dotenv
+
+from functions import clearify, get_modifier
+import templates
+
 
 load_dotenv()
 
 
 def main():
+    # Load environment variables
     reddit = praw.Reddit(
         client_id=os.getenv('APP_KEY'),
         client_secret=os.getenv('APP_SECRET'),
-        # password="PASSWORD",
-        user_agent="Clearify"
-        # username="USERNAME",
+        password=os.getenv('PASSWORD'),
+        user_agent="Clearify",
+        username=os.getenv('USERNAME'),
     )
 
-    subreddit = reddit.subreddit("ClearifyBot")
-    for comment in subreddit.stream.comments():
-        print(comment.body)
+    subreddit = reddit.subreddit("all")
+    for comment in subreddit.stream.comments(skip_existing=True):
+        # if comment contains !clearify and is not saved yet
+        if "!clearify" in comment.body.lower() and not comment.saved:
+            print(comment.body)
+            # get the level of clearification
+            level = get_modifier(comment.body)
+            print(
+                f"Comming right up! Let me Clerify for you being a {level}:\n{comment.parent().body}")
 
-
-# def process_submission(submission):
-#     # Ignore titles with more than 10 words as they probably are not simple questions.
-#     if len(submission.title.split()) > 10:
-#         return
-
-#     normalized_title = submission.title.lower()
-#     for question_phrase in QUESTIONS:
-#         if question_phrase in normalized_title:
-#             url_title = quote_plus(submission.title)
-#             reply_text = REPLY_TEMPLATE.format(url_title)
-#             print(f"Replying to: {submission.title}")
-#             submission.reply(reply_text)
-#             # A reply has been made so do not attempt to match other phrases.
-#             break
+            # make the clearification
+            clear = clearify(comment.parent().body, level)
+            # get the clearification message
+            message = clear['choices'][0]['message']['content']
+            # reply to the comment with the message
+            comment.reply(message + templates.FOOTER_TEMPLATE)
+            # save the comment so that we don't reply to it again
+            comment.save()
+            print("DONE!")
 
 
 if __name__ == "__main__":

@@ -3,6 +3,8 @@
 
 This is a Reddit bot that clarifies parent comments when a user replies with "!clearify". 
 
+***DONATE >*** [Buy Me A Slice 🍕](https://www.buymeacoffee.com/sethbang)
+
 ## What it does
 
 - Monitors the Reddit stream for new comments containing "!clearify"

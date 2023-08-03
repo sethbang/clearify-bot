@@ -16,13 +16,12 @@ def main():
     reddit = praw.Reddit(
         client_id=os.getenv('APP_KEY'),
         client_secret=os.getenv('APP_SECRET'),
-        password=os.getenv('PASSWORD'),
-        user_agent="Clearify",
-        username=os.getenv('USERNAME'),
+        user_agent="Clearify Helper Script to clear up and clairify by u/seth_b5t",
+        refresh_token=os.getenv('REFRESH_TOKEN'),
     )
 
     subreddit = reddit.subreddit("all")
-    for comment in subreddit.stream.comments(skip_existing=True):
+    for comment in subreddit.stream.comments():
         # if comment contains !clearify and is not saved yet
         if "!clearify" in comment.body.lower() and not comment.saved:
             print(comment.body)

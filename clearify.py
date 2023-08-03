@@ -10,6 +10,8 @@ import templates
 
 load_dotenv()
 
+# Main function that runs the bot
+
 
 def main():
     # Load environment variables
